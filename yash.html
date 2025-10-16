@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>31 Days of Love Countdown 💖</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    
+    <script type="text/javascript">
+        // --- Core Logic: No external databases needed. All messages are stored here. ---
+
+        let countdownInterval;
+        let currentPreviewIndex = 0; // Index for the message preview modal
+        let allMessagesList = []; 
+
+        // --- Configuration (Adjust if the year is different!) ---
+        const CURRENT_YEAR = new Date().getFullYear();
+        // Sets the start of the countdown to Oct 17th of the current year
+        const START_DATE = new Date(`${CURRENT_YEAR}-10-17T00:00:00`); 
+        // Sets the birthday target date to Nov 17th of the current year
+        const TARGET_DATE = new Date(`${CURRENT_YEAR}-11-17T00:00:00`); 
+        
+        // The 31 daily countdown messages (Oct 17 - Nov 16).
+        const DAILY_MESSAGES = [
+            "Day 1: Just wanted to start the countdown by saying you mean the world to me. Every day is better with you!", // Oct 17
+            "Day 2: I'm counting down the seconds until I can squeeze you tight. That's the best present for me! (Updated)",
+            "Day 3: Thinking back on our best memories and smiling. You're simply the best.",
+            "Day 4: I've watched you overcome challenges with so much strength and grace this year. That powerful focus and determination you have? That's what makes you unstoppable. I'm so proud to be by your side. (Updated - Pride/Motivation)",
+            "Day 5: You inspire me with your passion and kindness. Keep shining, my love.",
+            "Day 6: Six days down! You are the perfect mix of smart, funny, and incredibly handsome. Just wanted you to know that today. (Updated)",
+            "Day 7: Getting closer! Just one week of the countdown gone. Time flies when you're looking forward to something great.",
+            "Day 8: You have such a unique perspective and passion for making things better, whether it's at work or for your family. The positive impact you have on everyone around you is huge, and I love that about you. (Updated - Pride/Motivation)",
+            "Day 9: Your laugh is my favorite sound in the world. Never stop being joyful.",
+            "Day 10: You are one of the most brilliant and talented people I know. Never doubt your capabilities. Keep exploring, keep creating, and know that I’m your biggest cheerleader, always. (Updated - Pride/Motivation)", 
+            "Day 11: I'm excited for all the adventures we still have ahead of us.",
+            "Day 12: You’ve taught me so much about love and life. I’m so grateful for you.",
+            "Day 13: Your hugs are the best therapy. Wish I could give you one right now!",
+            "Day 14: Halfway to the birthday month! The anticipation is building! 🎉",
+            "Day 15: I hope your day is filled with as much happiness as you bring into mine.",
+            "Day 16: Sending you a digital kiss and a promise of a fantastic evening.",
+            "Day 17: Fun fact: Today is exactly 30 days until we celebrate you! Woohoo!",
+            "Day 18: Looking forward to cozy movie nights and just being next to you.",
+            "Day 19: You have the kindest heart, and the world is better because you're in it.",
+            "Day 20: Just over two weeks to go! Have a great, productive day!",
+            "Day 21: You're still the one who gives the best, most comforting forehead kisses. I love that sweet, small habit. (Updated)",
+            "Day 22: You’re my favorite person to talk to, laugh with, and dream alongside.",
+            "Day 23: I might be struggling to keep your birthday surprise a secret, but seeing you happy is worth the effort! Can't wait! (Updated)",
+            "Day 24: I’m proud of everything you’ve achieved this year. You’re amazing.",
+            "Day 25: It's feeling like a celebration already! You deserve every wonderful thing coming your way. So excited! (Updated)",
+            "Day 26: Only **FIVE** days left, my love! I'm officially starting the week of pre-birthday pampering and spoiling! (Updated)",
+            "Day 27: Four more days! Just a quick reminder that I adore you.",
+            "Day 28: Three days left, love! I can barely contain my excitement!",
+            "Day 29: Only two more sunrises until your special day! Sleep well!",
+            "Day 30: Tomorrow is the day! Hope you feel all the love surrounding you today.",
+            "Day 31: HAPPY BIRTHDAY EVE! Get ready for the best day ever. I love you, always." // Nov 16
+        ];
+        
+        // The special birthday message for Nov 17th!
+        const BIRTHDAY_MESSAGE = "🎂🎉🥂 HAPPY BIRTHDAY TO MY WONDERFUL BOYFRIEND! 🥂🎉🎂 Today, the 17th of November, is all about YOU. You are my best friend, my greatest adventure, and the love of my life. I am sending you the biggest virtual cake, thousands of kisses, and a promise for a day filled with all your favorite things. I love you, now and always!";
+
+
+        // --- Helper Function to format time difference ---
+        function formatTimeDifference(difference) {
+            if (difference < 0) {
+                return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+            }
+            const totalSeconds = Math.floor(difference / 1000);
+            const days = Math.floor(totalSeconds / (3600 * 24));
+            const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            return { days, hours, minutes, seconds };
+        }
+
+        // --- Daily Message Logic (Main View) ---
+        function getDailyMessage() {
+            const now = new Date();
+            const timeDiffMs = now.getTime() - START_DATE.getTime();
+            const dayIndex = Math.floor(timeDiffMs / (1000 * 60 * 60 * 24));
+            
+            // Populate messages for the Admin Preview Modal
+            allMessagesList = [...DAILY_MESSAGES, BIRTHDAY_MESSAGE]; 
+            
+            const messageElement = document.getElementById('daily-message');
+            const titleElement = document.getElementById('message-title');
+            const headerElement = document.getElementById('main-header');
+
+            messageElement.classList.add('opacity-0');
+            titleElement.classList.add('opacity-0');
+
+            setTimeout(() => {
+                if (now.getTime() >= TARGET_DATE.getTime()) {
+                    messageElement.textContent = BIRTHDAY_MESSAGE;
+                    titleElement.textContent = "It's the Big Day!";
+                    headerElement.textContent = "Happy Birthday, My Love! 🎉";
+
+                } else if (dayIndex >= 0 && dayIndex < DAILY_MESSAGES.length) {
+                    messageElement.textContent = DAILY_MESSAGES[dayIndex];
+                    titleElement.textContent = `Day ${dayIndex + 1} of 31`;
+                } else {
+                    messageElement.textContent = "The countdown is about to begin! Check back on October 17th.";
+                    titleElement.textContent = "Countdown Waiting...";
+                }
+                
+                messageElement.classList.remove('opacity-0');
+                titleElement.classList.remove('opacity-0');
+            }, 500);
+        }
+
+        // --- Message Preview Modal Logic (Admin View) ---
+        function displayMessage(index) {
+            currentPreviewIndex = index;
+            const totalMessages = allMessagesList.length;
+            const messageText = allMessagesList[index];
+            let title = `Message Preview: `;
+
+            title += (index < totalMessages - 1) ? `Day ${index + 1} of 31` : `Birthday (Nov 17)`;
+
+            document.getElementById('preview-title').textContent = title;
+            document.getElementById('preview-message').textContent = messageText;
+
+            document.getElementById('prev-btn').disabled = index === 0;
+            document.getElementById('next-btn').disabled = index === totalMessages - 1;
+            document.getElementById('prev-btn').classList.toggle('opacity-50', index === 0);
+            document.getElementById('next-btn').classList.toggle('opacity-50', index === totalMessages - 1);
+        }
+
+        function showPreviewModal() {
+            currentPreviewIndex = 0; 
+            displayMessage(currentPreviewIndex);
+            document.getElementById('message-preview-modal').classList.remove('hidden');
+        }
+
+        function closePreviewModal() {
+            document.getElementById('message-preview-modal').classList.add('hidden');
+        }
+
+        window.navigatePreview = (direction) => {
+            const totalMessages = allMessagesList.length;
+            let newIndex = currentPreviewIndex + direction;
+
+            if (newIndex >= 0 && newIndex < totalMessages) {
+                displayMessage(newIndex);
+            }
+        };
+
+        window.showPreviewModal = showPreviewModal;
+        window.closePreviewModal = closePreviewModal;
+
+        // --- Main Countdown Function ---
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = TARGET_DATE.getTime() - now;
+            const time = formatTimeDifference(distance);
+            const countdownElement = document.getElementById('countdown');
+
+            if (distance < 0) {
+                clearInterval(countdownInterval);
+                countdownElement.innerHTML = `<div class="text-6xl md:text-8xl text-pink-500 font-extrabold animate-pulse">00</div><div class="text-sm font-medium text-gray-300">Days</div>`;
+            } else {
+                countdownElement.innerHTML = `
+                    <div class="flex space-x-4 md:space-x-8">
+                        <div class="text-center"><div class="text-4xl md:text-6xl font-extrabold text-pink-500 animate-bounce-slow">${String(time.days).padStart(2, '0')}</div><div class="text-xs font-medium text-gray-400 mt-1">DAYS</div></div>
+                        <div class="hidden sm:block text-2xl font-bold text-gray-500 self-center">:</div>
+                        <div class="text-center"><div class="text-4xl md:text-6xl font-extrabold">${String(time.hours).padStart(2, '0')}</div><div class="text-xs font-medium text-gray-400 mt-1">HOURS</div></div>
+                        <div class="text-center text-2xl font-bold text-gray-500 self-center">:</div>
+                        <div class="text-center"><div class="text-4xl md:text-6xl font-extrabold">${String(time.minutes).padStart(2, '0')}</div><div class="text-xs font-medium text-gray-400 mt-1">MINUTES</div></div>
+                        <div class="text-center text-2xl font-bold text-gray-500 self-center">:</div>
+                        <div class="text-center"><div class="text-4xl md:text-6xl font-extrabold">${String(time.seconds).padStart(2, '0')}</div><div class="text-xs font-medium text-gray-400 mt-1">SECONDS</div></div>
+                    </div>
+                `;
+            }
+        }
+
+        // --- Initialization ---
+        function initApp() {
+            getDailyMessage();
+            updateCountdown();
+            countdownInterval = setInterval(updateCountdown, 1000);
+            
+            document.getElementById('loading-spinner').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('opacity-0');
+        }
+
+        // Initialize on window load
+        window.onload = initApp;
+
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Bold Pink Background Theme */
+            background: linear-gradient(135deg, #fce7f3 0%, #f472b6 100%); /* Lightest Pink to Medium Pink */
+            color: #e5e5e5;
+            overflow-x: hidden;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 4px solid #f9f9f9;
+            border-top: 4px solid #ec4899; 
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Subtle Bounce for Countdown Days */
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .animate-bounce-slow {
+            animation: bounce-slow 4s infinite ease-in-out;
+        }
+        
+        /* Custom pink glow effect for the message card */
+        .message-glow {
+            box-shadow: 0 0 18px rgba(236, 72, 153, 0.8), 0 0 8px rgba(255, 255, 255, 0.4); 
+            border: 1px solid rgba(236, 72, 153, 0.7); 
+        }
+        
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 relative">
+
+    <!-- Loading State -->
+    <div id="loading-spinner" class="fixed inset-0 bg-gray-900/80 z-50 flex flex-col items-center justify-center">
+        <div class="spinner mb-4"></div>
+        <p class="text-xl font-bold text-pink-400 tracking-wider animate-pulse">LET'S GO!</p>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="w-full max-w-2xl bg-gray-900/80 backdrop-blur-sm shadow-2xl rounded-3xl p-6 md:p-10 text-center transition-opacity duration-700 opacity-0 mb-4 border border-pink-400/20 z-10">
+        
+        <header class="mb-8">
+            <div class="text-4xl mb-4 animate-pulse text-pink-400">💖🥂🎉</div>
+            <h1 id="main-header" class="text-3xl md:text-4xl font-extrabold text-white leading-tight tracking-wide">
+                31 Days Until Your Birthday, My Love!
+            </h1>
+        </header>
+
+        <!-- Countdown Timer -->
+        <section class="bg-gray-800 p-6 md:p-8 rounded-2xl mb-8 border border-pink-500/50 shadow-inner shadow-pink-500/10">
+            <h2 class="text-lg font-semibold text-pink-400 mb-4 tracking-wider">TIME LEFT UNTIL WE CELEBRATE:</h2>
+            <div id="countdown" class="flex justify-center items-center text-white">
+                <p class="text-gray-400">Initializing timer...</p>
+            </div>
+        </section>
+        
+        <!-- Daily Message Card -->
+        <section class="bg-gray-900 p-6 md:p-8 rounded-2xl message-glow transition duration-500">
+            <h2 id="message-title" class="text-xl md:text-2xl font-bold text-pink-500 mb-4 h-8 transition duration-500">
+                Loading Daily Message...
+            </h2>
+            <p id="daily-message" class="text-lg text-gray-200 italic leading-relaxed min-h-[5rem] transition duration-500">
+                Your special note is arriving soon...
+            </p>
+            <div class="mt-6 text-3xl animate-bounce-slow text-pink-500">
+                ❤️
+            </div>
+        </section>
+        
+        <footer class="mt-8 text-xs text-gray-500 flex flex-col items-center">
+            <button onclick="showPreviewModal()" class="mb-2 text-pink-300 hover:text-pink-500 font-medium text-sm transition-colors duration-200 focus:outline-none">
+                👀 Preview All Messages (Admin View)
+            </button>
+            <p>Built with endless love and a little bit of magic.</p>
+        </footer>
+    </div>
+
+    <!-- --- MESSAGE PREVIEW MODAL --- -->
+    <div id="message-preview-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-95 flex items-center justify-center p-4 z-50">
+        <div class="bg-gray-800 w-full max-w-md md:max-w-lg rounded-xl shadow-2xl p-6 relative border border-pink-500/50">
+            
+            <!-- Header & Close Button -->
+            <div class="flex justify-between items-center border-b border-gray-700 pb-3 mb-4">
+                <h3 class="text-xl font-bold text-pink-400" id="preview-title">Message Preview</h3>
+                <button onclick="closePreviewModal()" class="text-gray-400 hover:text-white focus:outline-none p-1 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Message Content -->
+            <p id="preview-message" class="text-base text-gray-200 italic min-h-[6rem] mb-6">
+                
+            </p>
+
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between space-x-4">
+                <button id="prev-btn" onclick="navigatePreview(-1)" 
+                        class="flex items-center justify-center px-4 py-2 bg-pink-700 text-white font-semibold rounded-lg hover:bg-pink-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Previous
+                </button>
+                <button id="next-btn" onclick="navigatePreview(1)" 
+                        class="flex items-center justify-center px-4 py-2 bg-pink-500 text-white font-semibold rounded-lg hover:bg-pink-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    Next
+                    <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+            </div>
+            <p class="mt-4 text-xs text-gray-500 text-center">You can now scroll through all 32 messages!</p>
+
+        </div>
+    </div>
+</body>
+  </html>
